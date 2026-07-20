@@ -107,6 +107,69 @@ function atomsToXYZ(atoms, comment = "") {
     atoms.map(a => `${a.el} ${a.x.toFixed(6)} ${a.y.toFixed(6)} ${a.z.toFixed(6)}`).join("\n");
 }
 
+/* ---------- bond-order perception ----------
+   3Dmol.js only draws single bonds from XYZ coordinates. To show double/triple
+   bonds (e.g. acetone's C=O) we perceive connectivity from covalent radii and
+   assign orders from element-pair reference bond lengths, then satisfy valence.
+   The structure is emitted as a MOL (V2000) block, which carries bond orders. */
+const COVRAD = { H:0.31, B:0.84, C:0.76, N:0.71, O:0.66, F:0.57, Si:1.11, P:1.07,
+  S:1.05, Cl:1.02, Br:1.20, I:1.39, Li:1.28, Na:1.66, Mg:1.41, Al:1.21,
+  K:2.03, Ca:1.76, Fe:1.32, Zn:1.22, Se:1.20 };
+// typical neutral valence — used to decide how many pi bonds an atom wants
+const VALENCE = { H:1, B:3, C:4, N:3, O:2, F:1, Si:4, P:3, S:2, Cl:1, Br:1, I:1, Se:2, B:3 };
+
+/* Perceive connectivity and bond orders from 3D coordinates.
+   Step 1: bonds by covalent radii. Step 2: each heavy atom "wants" pi bonds
+   equal to (valence - number of neighbours). Step 3: greedy shortest-first
+   matching promotes bonds between two atoms that both still want pi electrons.
+   This yields carbonyl C=O, alkyne/N2 triples, CO2, and a proper alternating
+   Kekulé structure for aromatic rings (resonance shown as one resonance form). */
+function perceiveBonds(atoms) {
+  const bonds = [];
+  const deg = atoms.map(() => 0);
+  for (let i = 0; i < atoms.length; i++) {
+    for (let j = i + 1; j < atoms.length; j++) {
+      const a = atoms[i], b = atoms[j];
+      const d = Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z);
+      const cut = (COVRAD[a.el] || 0.77) + (COVRAD[b.el] || 0.77) + 0.45;
+      if (d > 0.4 && d <= cut) { bonds.push({ i, j, d, order: 1 }); deg[i]++; deg[j]++; }
+    }
+  }
+  const need = atoms.map((a, i) => a.el === "H" ? 0
+    : Math.max(0, (VALENCE[a.el] || deg[i]) - deg[i]));
+  // candidate pi bonds: both endpoints heavy and still wanting electrons
+  const cands = bonds.filter(b => atoms[b.i].el !== "H" && atoms[b.j].el !== "H");
+  const availFor = i => cands.filter(b =>
+    (b.i === i || b.j === i) && b.order < 3 && need[b.i] > 0 && need[b.j] > 0);
+  // most-constrained-first matching: repeatedly satisfy the atom with the
+  // fewest available partners (greedy shortest-first mis-solves symmetric rings)
+  let guard = 0;
+  while (guard++ < 1000) {
+    let pick = -1, fewest = Infinity;
+    for (let i = 0; i < atoms.length; i++) {
+      if (need[i] <= 0) continue;
+      const n = availFor(i).length;
+      if (n > 0 && n < fewest) { fewest = n; pick = i; }
+    }
+    if (pick < 0) break;
+    const b = availFor(pick).sort((p, q) => p.d - q.d)[0];
+    b.order++; need[b.i]--; need[b.j]--;
+  }
+  return bonds;
+}
+
+function atomsToMol(atoms, comment = "") {
+  const bonds = perceiveBonds(atoms);
+  const pad = (s, n) => String(s).padStart(n);
+  const f = v => v.toFixed(4).padStart(10);
+  let s = "\n  NWStudio          3D\n" + comment + "\n";
+  s += pad(atoms.length, 3) + pad(bonds.length, 3) + "  0  0  0  0  0  0  0  0999 V2000\n";
+  for (const a of atoms) s += f(a.x) + f(a.y) + f(a.z) + " " + (a.el + "  ").slice(0, 3) + " 0  0  0  0  0  0  0  0  0  0  0  0\n";
+  for (const b of bonds) s += pad(b.i + 1, 3) + pad(b.j + 1, 3) + pad(b.order, 3) + "  0\n";
+  s += "M  END\n";
+  return s;
+}
+
 function generateInput() {
   const name = $("#nj-name").value.trim() || "job";
   const atoms = parseXYZText($("#nj-geom").value);
@@ -153,7 +216,7 @@ function updateNewJobPreview() {
   }
   njViewer.removeAllModels();
   if (atoms.length) {
-    njViewer.addModel(atomsToXYZ(atoms), "xyz");
+    njViewer.addModel(atomsToMol(atoms), "mol");
     njViewer.setStyle({}, { stick: { radius: 0.12 }, sphere: { scale: 0.28 } });
     njViewer.zoomTo();
   }
@@ -281,7 +344,8 @@ function renderResults(root, r) {
     vibrating = false;
     viewer.stopAnimate();
     viewer.removeAllModels();
-    viewer.addModel(xyz, "xyz");
+    // perceive bond orders so double/triple bonds render (3Dmol XYZ = single only)
+    viewer.addModel(atomsToMol(parseXYZText(xyz)), "mol");
     applyStyle();
     viewer.zoomTo();
     viewer.render();
