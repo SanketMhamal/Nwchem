@@ -124,7 +124,7 @@ H   0.000000  -0.762630  -0.485038</textarea>
   </main>
 </div>
 
-<div id="watermark">Sanket Mhamal · Assistant Professor · Goa University</div>
+<div id="watermark">Sanket Mhamal · Assistant Professor, DCST, GBS · Goa University</div>
 
 <!-- Help dialog -->
 <dialog id="dlg-help">
@@ -137,9 +137,9 @@ H   0.000000  -0.762630  -0.485038</textarea>
        level of theory (DFT, Hartree–Fock or MP2), functional, basis set and
        the task:</p>
     <ul>
-      <li><b>Single-point energy</b> — energy at the given geometry.</li>
-      <li><b>Geometry optimization</b> — relax the structure to a minimum.</li>
-      <li><b>Optimization + frequencies</b> — optimize, then compute vibrations
+      <li><b>Single-point energy</b>  energy at the given geometry.</li>
+      <li><b>Geometry optimization</b>  relax the structure to a minimum.</li>
+      <li><b>Optimization + frequencies</b>  optimize, then compute vibrations
           (recommended: confirms you found a true minimum).</li>
     </ul>
     <p>The generated NWChem input file is shown live; after creating the job you
@@ -152,22 +152,22 @@ H   0.000000  -0.762630  -0.485038</textarea>
 
     <h3>3. Explore the results</h3>
     <ul>
-      <li><b>3D structure</b> — rotate (drag), zoom (scroll). Switch between
+      <li><b>3D structure</b> rotate (drag), zoom (scroll). Switch between
           ball-and-stick, spacefill and wireframe; toggle atom labels.</li>
-      <li><b>Trajectory</b> — for optimizations, use the frame slider or
+      <li><b>Trajectory</b>  for optimizations, use the frame slider or
           <b>▶ Play</b> to watch the geometry relax.</li>
-      <li><b>Energy chart</b> — energy at each optimization step; it should
+      <li><b>Energy chart</b>  energy at each optimization step; it should
           decrease and flatten out when converged.</li>
-      <li><b>Frequencies</b> — click any value to animate that vibrational mode.
+      <li><b>Frequencies</b>  click any value to animate that vibrational mode.
           Red (negative) values are imaginary frequencies: the structure is a
           saddle point, not a minimum.</li>
-      <li><b>Summary cards</b> — final energy (in Hartree), convergence status,
+      <li><b>Summary cards</b>  final energy (in Hartree), convergence status,
           dipole moment and imaginary-frequency count.</li>
     </ul>
 
     <h3>Visualize existing files</h3>
     <p><b>Open output file…</b> loads any NWChem <code>.out</code> file (or a
-       plain <code>.xyz</code>) without running anything — useful for results
+       plain <code>.xyz</code>) without running anything  useful for results
        computed elsewhere, e.g. on a cluster.</p>
 
     <h3>Tips</h3>
@@ -175,7 +175,7 @@ H   0.000000  -0.762630  -0.485038</textarea>
       <li>Energies are in Hartree (1 Ha = 27.211 eV = 627.5 kcal/mol).</li>
       <li>Start small: sto-3g or 3-21g for quick tests, 6-31g* or def2-svp for
           production geometries.</li>
-      <li>If a job fails, read the end of the <b>Output log</b> — NWChem prints
+      <li>If a job fails, read the end of the <b>Output log</b>  NWChem prints
           the reason there. If it runs out of memory, add a line like
           <code>memory 400 mb</code> to the input.</li>
       <li>⚙ Settings lets you change the NWChem Docker image.</li>
