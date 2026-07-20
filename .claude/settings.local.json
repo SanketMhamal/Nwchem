@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(docker --version)",
+      "PowerShell(docker info --format '{{.ServerVersion}} {{.OSType}}')",
+      "PowerShell(python --version)",
+      "PowerShell(node --version)",
+      "PowerShell(npm --version)",
+      "PowerShell(python -m pip install fastapi \"uvicorn[standard]\" --quiet)",
+      "PowerShell(python -c \"import fastapi, uvicorn; print\\(fastapi.__version__, uvicorn.__version__\\)\")",
+      "PowerShell($job = Get-ChildItem E:\\\\nwchem\\\\jobs -Directory | Select-Object -First 1; Copy-Item \"C:\\\\Users\\\\czent\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\E--nwchem\\\\5a26574d-dc42-4710-a502-d8e1938888f1\\\\scratchpad\\\\sample.out\" \"$\\($job.FullName\\)\\\\output.out\"; $meta = Get-Content \"$\\($job.FullName\\)\\\\meta.json\" | ConvertFrom-Json; $meta.status = \"done\"; $meta | ConvertTo-Json | Out-File \"$\\($job.FullName\\)\\\\meta.json\" -Encoding utf8; $job.Name)",
+      "PowerShell($env:APP_PASSWORD = \"testpw123\"; Start-Process -WindowStyle Hidden python -ArgumentList \"-m\",\"uvicorn\",\"app.server:app\",\"--port\",\"8399\" -WorkingDirectory \"E:\\\\nwchem\" -PassThru | Select-Object -ExpandProperty Id)",
+      "PowerShell(Start-Sleep 3; $r1 = Invoke-WebRequest \"http://127.0.0.1:8399/api/status\" -UseBasicParsing; \"status\\(open\\): $\\($r1.StatusCode\\) auth=$\\(\\(\\($r1.Content | ConvertFrom-Json\\).auth\\)\\)\"; try { Invoke-WebRequest \"http://127.0.0.1:8399/api/jobs\" -UseBasicParsing } catch { \"jobs\\(no cookie\\): $\\($_.Exception.Response.StatusCode.value__\\)\" }; try { Invoke-WebRequest \"http://127.0.0.1:8399/api/login\" -Method POST -Body '{\"password\":\"wrong\"}' -ContentType \"application/json\" -UseBasicParsing } catch { \"login\\(wrong\\): $\\($_.Exception.Response.StatusCode.value__\\)\" }; $s = New-Object Microsoft.PowerShell.Commands.WebRequestSession; $r2 = Invoke-WebRequest \"http://127.0.0.1:8399/api/login\" -Method POST -Body '{\"password\":\"testpw123\"}' -ContentType \"application/json\" -WebSession $s -UseBasicParsing; \"login\\(right\\): $\\($r2.StatusCode\\)\"; $r3 = Invoke-WebRequest \"http://127.0.0.1:8399/api/jobs\" -WebSession $s -UseBasicParsing; \"jobs\\(cookie\\): $\\($r3.StatusCode\\)\")",
+      "PowerShell(Stop-Process -Id 22128 -Force -Confirm:$false)",
+      "PowerShell(git init -b main)",
+      "PowerShell(git add -A)"
+    ]
+  }
+}

@@ -1,0 +1,8 @@
+jobs/
+settings.json
+.claude/
+.git/
+__pycache__/
+*.pyc
+start.bat
+README.md

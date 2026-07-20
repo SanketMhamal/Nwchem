@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>NWChem Studio</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/static/style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.1.0/3Dmol-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div id="app">
+  <aside id="sidebar">
+    <div class="brand">⚛ NWChem Studio</div>
+    <div id="docker-badge" class="badge">checking docker…</div>
+    <button id="btn-new" class="primary">+ New job</button>
+    <label class="file-btn">Open output file…<input id="file-open" type="file" hidden></label>
+    <div id="job-list"></div>
+    <div class="sidebar-footer">
+      <button id="btn-settings" class="ghost">⚙ Settings</button>
+    </div>
+  </aside>
+
+  <main id="main">
+    <!-- New job wizard -->
+    <section id="view-new" class="view" hidden>
+      <h1>New calculation</h1>
+      <div class="grid2">
+        <div>
+          <label>Job name <input id="nj-name" value="water-opt"></label>
+          <label>Geometry (XYZ: element x y z, one atom per line)
+            <textarea id="nj-geom" rows="8" spellcheck="false">O   0.000000   0.000000   0.121259
+H   0.000000   0.762630  -0.485038
+H   0.000000  -0.762630  -0.485038</textarea>
+          </label>
+          <div class="row">
+            <label>Charge <input id="nj-charge" type="number" value="0" style="width:70px"></label>
+            <label>Multiplicity <input id="nj-mult" type="number" value="1" min="1" style="width:70px"></label>
+          </div>
+          <div class="row">
+            <label>Theory
+              <select id="nj-theory">
+                <option value="dft" selected>DFT</option>
+                <option value="scf">Hartree–Fock (SCF)</option>
+                <option value="mp2">MP2</option>
+              </select>
+            </label>
+            <label>Functional
+              <select id="nj-xc">
+                <option selected>b3lyp</option><option>pbe0</option><option>m06-2x</option>
+                <option>pbe96</option><option>blyp</option>
+              </select>
+            </label>
+            <label>Basis set
+              <select id="nj-basis">
+                <option>sto-3g</option><option>3-21g</option><option selected>6-31g*</option>
+                <option>6-311g**</option><option>cc-pvdz</option><option>cc-pvtz</option>
+                <option>def2-svp</option><option>def2-tzvp</option>
+              </select>
+            </label>
+          </div>
+          <div class="row">
+            <label>Task
+              <select id="nj-task">
+                <option value="energy">Single-point energy</option>
+                <option value="optimize" selected>Geometry optimization</option>
+                <option value="optfreq">Optimization + frequencies</option>
+                <option value="freq">Frequencies only</option>
+              </select>
+            </label>
+          </div>
+          <button id="nj-create" class="primary">Create job →</button>
+        </div>
+        <div>
+          <div class="panel-title">Geometry preview</div>
+          <div id="nj-viewer" class="viewer small"></div>
+          <div class="panel-title">Generated input (editable after creation)</div>
+          <pre id="nj-preview" class="code-preview"></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Job view -->
+    <section id="view-job" class="view" hidden>
+      <div class="job-header">
+        <h1 id="job-title"></h1>
+        <span id="job-status" class="status"></span>
+        <div class="spacer"></div>
+        <button id="btn-run" class="primary">▶ Run</button>
+        <button id="btn-cancel" class="danger" hidden>■ Cancel</button>
+        <button id="btn-delete" class="ghost">🗑 Delete</button>
+      </div>
+      <nav class="tabs">
+        <button data-tab="input" class="tab active">Input</button>
+        <button data-tab="log" class="tab">Output log</button>
+        <button data-tab="results" class="tab">Results</button>
+      </nav>
+      <div id="tab-input" class="tab-pane">
+        <textarea id="job-input" spellcheck="false"></textarea>
+        <button id="btn-save-input">Save input</button>
+      </div>
+      <div id="tab-log" class="tab-pane" hidden>
+        <pre id="job-log" class="log"></pre>
+      </div>
+      <div id="tab-results" class="tab-pane" hidden>
+        <div id="results-root"></div>
+      </div>
+    </section>
+
+    <!-- Results-only view for opened files -->
+    <section id="view-file" class="view" hidden>
+      <h1 id="file-title">Opened file</h1>
+      <div id="file-results"></div>
+    </section>
+
+    <!-- Welcome -->
+    <section id="view-welcome" class="view">
+      <h1>Welcome</h1>
+      <p>Create a new NWChem job, or open an existing NWChem output file to
+         visualize structures, optimization trajectories and vibrations.</p>
+      <p id="welcome-docker"></p>
+    </section>
+  </main>
+</div>
+
+<!-- Settings dialog -->
+<dialog id="dlg-settings">
+  <h2>Settings</h2>
+  <label>Docker image <input id="set-image" style="width:100%"></label>
+  <label>Shared memory size <input id="set-shm" style="width:120px"></label>
+  <div class="row" style="justify-content:flex-end">
+    <button id="set-cancel" class="ghost">Cancel</button>
+    <button id="set-save" class="primary">Save</button>
+  </div>
+</dialog>
+
+<template id="tpl-results">
+  <div class="results-grid">
+    <div class="results-left">
+      <div class="panel-title">Structure <span class="geom-info"></span></div>
+      <div class="viewer big r-viewer"></div>
+      <div class="viewer-controls">
+        <label>Frame <input type="range" class="traj-slider" min="0" max="0" value="0"></label>
+        <button class="traj-play ghost">▶ Play trajectory</button>
+        <select class="style-select">
+          <option value="ballstick" selected>Ball &amp; stick</option>
+          <option value="stick">Stick</option>
+          <option value="sphere">Spacefill</option>
+          <option value="line">Wireframe</option>
+        </select>
+        <label class="chk"><input type="checkbox" class="labels-chk"> labels</label>
+      </div>
+    </div>
+    <div class="results-right">
+      <div class="summary-cards"></div>
+      <div class="panel-title energy-title" hidden>Optimization energy</div>
+      <canvas class="energy-chart" height="180" hidden></canvas>
+      <div class="panel-title freq-title" hidden>Vibrational frequencies (click to animate)</div>
+      <div class="freq-list"></div>
+    </div>
+  </div>
+</template>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: nwchem-studio
+    runtime: docker
+    plan: starter          # "free" works but 512 MB RAM limits job size and idle instances spin down (killing running jobs)
+    healthCheckPath: /api/status
+    envVars:
+      - key: APP_PASSWORD  # you will be prompted for a value on first deploy
+        sync: false
+      - key: MAX_JOB_SECONDS
+        value: "1800"      # kill runaway jobs after 30 min; raise if you need longer optimizations
+    # Job history survives restarts/deploys only with a persistent disk (paid plans):
+    # disk:
+    #   name: nwchem-jobs
+    #   mountPath: /srv/jobs
+    #   sizeGB: 1

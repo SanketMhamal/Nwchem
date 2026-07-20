@@ -1,0 +1,4 @@
+jobs/
+settings.json
+__pycache__/
+*.pyc
