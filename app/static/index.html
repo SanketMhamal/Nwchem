@@ -17,6 +17,7 @@
     <label class="file-btn">Open output file…<input id="file-open" type="file" hidden></label>
     <div id="job-list"></div>
     <div class="sidebar-footer">
+      <button id="btn-help" class="ghost">❓ Help</button>
       <button id="btn-settings" class="ghost">⚙ Settings</button>
     </div>
   </aside>
@@ -122,6 +123,68 @@ H   0.000000  -0.762630  -0.485038</textarea>
     </section>
   </main>
 </div>
+
+<div id="watermark">Sanket Mhamal · Assistant Professor · Goa University</div>
+
+<!-- Help dialog -->
+<dialog id="dlg-help">
+  <h2>How to use NWChem Studio</h2>
+  <div class="help-body">
+    <h3>1. Create a job</h3>
+    <p>Click <b>+ New job</b>. Paste your molecule as XYZ coordinates — one atom
+       per line: <code>element&nbsp;x&nbsp;y&nbsp;z</code> in ångströms (the 3D
+       preview updates as you type). Choose the charge, spin multiplicity,
+       level of theory (DFT, Hartree–Fock or MP2), functional, basis set and
+       the task:</p>
+    <ul>
+      <li><b>Single-point energy</b> — energy at the given geometry.</li>
+      <li><b>Geometry optimization</b> — relax the structure to a minimum.</li>
+      <li><b>Optimization + frequencies</b> — optimize, then compute vibrations
+          (recommended: confirms you found a true minimum).</li>
+    </ul>
+    <p>The generated NWChem input file is shown live; after creating the job you
+       can hand-edit it in the <b>Input</b> tab before running.</p>
+
+    <h3>2. Run it</h3>
+    <p>Press <b>▶ Run</b>. The <b>Output log</b> tab streams NWChem's raw output
+       live; you can <b>■ Cancel</b> a job at any time. The badge in the sidebar
+       shows whether a compute backend (Docker or built-in NWChem) is available.</p>
+
+    <h3>3. Explore the results</h3>
+    <ul>
+      <li><b>3D structure</b> — rotate (drag), zoom (scroll). Switch between
+          ball-and-stick, spacefill and wireframe; toggle atom labels.</li>
+      <li><b>Trajectory</b> — for optimizations, use the frame slider or
+          <b>▶ Play</b> to watch the geometry relax.</li>
+      <li><b>Energy chart</b> — energy at each optimization step; it should
+          decrease and flatten out when converged.</li>
+      <li><b>Frequencies</b> — click any value to animate that vibrational mode.
+          Red (negative) values are imaginary frequencies: the structure is a
+          saddle point, not a minimum.</li>
+      <li><b>Summary cards</b> — final energy (in Hartree), convergence status,
+          dipole moment and imaginary-frequency count.</li>
+    </ul>
+
+    <h3>Visualize existing files</h3>
+    <p><b>Open output file…</b> loads any NWChem <code>.out</code> file (or a
+       plain <code>.xyz</code>) without running anything — useful for results
+       computed elsewhere, e.g. on a cluster.</p>
+
+    <h3>Tips</h3>
+    <ul>
+      <li>Energies are in Hartree (1 Ha = 27.211 eV = 627.5 kcal/mol).</li>
+      <li>Start small: sto-3g or 3-21g for quick tests, 6-31g* or def2-svp for
+          production geometries.</li>
+      <li>If a job fails, read the end of the <b>Output log</b> — NWChem prints
+          the reason there. If it runs out of memory, add a line like
+          <code>memory 400 mb</code> to the input.</li>
+      <li>⚙ Settings lets you change the NWChem Docker image.</li>
+    </ul>
+  </div>
+  <div class="row" style="justify-content:flex-end">
+    <button id="help-close" class="primary">Close</button>
+  </div>
+</dialog>
 
 <!-- Settings dialog -->
 <dialog id="dlg-settings">

@@ -462,6 +462,10 @@ $("#file-open").onchange = async (ev) => {
   ev.target.value = "";
 };
 
+/* help */
+$("#btn-help").onclick = () => $("#dlg-help").showModal();
+$("#help-close").onclick = () => $("#dlg-help").close();
+
 /* settings */
 $("#btn-settings").onclick = () => {
   $("#set-image").value = state.settings?.docker_image || "";

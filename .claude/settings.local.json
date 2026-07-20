@@ -13,7 +13,9 @@
       "PowerShell(Start-Sleep 3; $r1 = Invoke-WebRequest \"http://127.0.0.1:8399/api/status\" -UseBasicParsing; \"status\\(open\\): $\\($r1.StatusCode\\) auth=$\\(\\(\\($r1.Content | ConvertFrom-Json\\).auth\\)\\)\"; try { Invoke-WebRequest \"http://127.0.0.1:8399/api/jobs\" -UseBasicParsing } catch { \"jobs\\(no cookie\\): $\\($_.Exception.Response.StatusCode.value__\\)\" }; try { Invoke-WebRequest \"http://127.0.0.1:8399/api/login\" -Method POST -Body '{\"password\":\"wrong\"}' -ContentType \"application/json\" -UseBasicParsing } catch { \"login\\(wrong\\): $\\($_.Exception.Response.StatusCode.value__\\)\" }; $s = New-Object Microsoft.PowerShell.Commands.WebRequestSession; $r2 = Invoke-WebRequest \"http://127.0.0.1:8399/api/login\" -Method POST -Body '{\"password\":\"testpw123\"}' -ContentType \"application/json\" -WebSession $s -UseBasicParsing; \"login\\(right\\): $\\($r2.StatusCode\\)\"; $r3 = Invoke-WebRequest \"http://127.0.0.1:8399/api/jobs\" -WebSession $s -UseBasicParsing; \"jobs\\(cookie\\): $\\($r3.StatusCode\\)\")",
       "PowerShell(Stop-Process -Id 22128 -Force -Confirm:$false)",
       "PowerShell(git init -b main)",
-      "PowerShell(git add -A)"
+      "PowerShell(git add -A)",
+      "PowerShell(gh --version)",
+      "PowerShell(gh auth status)"
     ]
   }
 }
